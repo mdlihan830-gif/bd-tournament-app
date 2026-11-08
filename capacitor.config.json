@@ -1,0 +1,6 @@
+{
+  "appId": "com.bdtournament.app",
+  "appName": "BD TOURNAMENT",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
