@@ -29,31 +29,36 @@ jobs:
           npm install
           npx cap add android
 
-      - name: Auto Fix Names & Generate Launcher Icon
+      - name: Configure Icon & Google Services
         run: |
-          mkdir -p assets
-          # Auto-detect your uploaded icon file
-          if [ -f "icon..png" ]; then
-            cp "icon..png" assets/icon.png
-          elif [ -f "icon.png.png" ]; then
-            cp "icon.png.png" assets/icon.png
-          elif [ -f "icon.png" ]; then
-            cp "icon.png" assets/icon.png
+          # 1. Auto-detect and replace launcher icons
+          ICON_FILE=""
+          for f in "icon..png" "icon.png.png" "icon.png"; do
+            if [ -f "$f" ]; then
+              ICON_FILE="$f"
+              break
+            fi
+          done
+
+          if [ -n "$ICON_FILE" ]; then
+            echo "Found icon: $ICON_FILE"
+            for dir in android/app/src/main/res/mipmap-*; do
+              if [ "$dir" != "android/app/src/main/res/mipmap-anydpi-v26" ]; then
+                cp "$ICON_FILE" "$dir/ic_launcher.png" || true
+                cp "$ICON_FILE" "$dir/ic_launcher_round.png" || true
+                cp "$ICON_FILE" "$dir/ic_launcher_foreground.png" || true
+              fi
+            done
+            echo "All launcher icons replaced successfully!"
           fi
 
-          if [ -f "assets/icon.png" ]; then
-            npm install -D @capacitor/assets
-            npx @capacitor/assets generate --android --iconOnly
-            echo "Logo generated successfully!"
-          fi
-
-          # Auto-detect google services file even with (1)
+          # 2. Auto-detect and copy google-services.json
           if [ -f "google-services (1).json" ]; then
-            cp "google-services (1).json" android/app/google-services.json
-            echo "Google services mapped successfully!"
+            cp "google-services (1).json" android/app/google-services.json || true
+            echo "Mapped google-services (1).json"
           elif [ -f "google-services.json" ]; then
-            cp "google-services.json" android/app/google-services.json
-            echo "Google services mapped successfully!"
+            cp "google-services.json" android/app/google-services.json || true
+            echo "Mapped google-services.json"
           fi
 
           npx cap sync
