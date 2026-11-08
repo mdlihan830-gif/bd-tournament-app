@@ -3575,11 +3575,24 @@ function toggleVoiceRecognition() {
   speechRecognitionInstance.start();
 }
 
-/* ---------- NATIVE ANDROID SYSTEM NOTIFICATION TRIGGER ---------- */
-// অ্যাপ ওপেন হলেই ফোনের আসল নোটিফিকেশন পারমিশন চাইবে
+/* ============================================================
+   HEADS-UP POP-UP NOTIFICATION & DIRECT LOGO ENGINE
+   ============================================================ */
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+      // স্ক্রিনের ওপর পপ-আপ নামিয়ে আনার জন্য MAX Priority চ্যানেল
+      await window.Capacitor.Plugins.LocalNotifications.createChannel({
+        id: 'tournament_urgent_popup',
+        name: 'Urgent Match & Room Alerts',
+        description: 'Heads-up popups for matches and announcements',
+        importance: 5, // MAX Importance (স্ক্রিনে পপ-আপ ভাসবে)
+        visibility: 1, // লক স্ক্রিনেও শো করবে
+        sound: 'default',
+        vibration: true,
+        lights: true,
+        lightColor: '#2563eb'
+      });
       await window.Capacitor.Plugins.LocalNotifications.requestPermissions();
     }
   } catch(e){}
@@ -3601,7 +3614,7 @@ onValue(ref(db, 'notifications'), async snapshot => {
   if (latestNotif && latestNotif.ts > (window._lastNotifTimestamp || 0)) {
     window._lastNotifTimestamp = latestNotif.ts;
 
-    // ১. ফোনের ওপরের ড্রয়ারে (Status Bar) আসল অ্যান্ড্রয়েড নোটিফিকেশন ফেলবে
+    // ১. ফোনের ওপর ডাইরেক্ট পপ-আপ + আসল রঙিন লোগো
     try {
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
         await window.Capacitor.Plugins.LocalNotifications.schedule({
@@ -3610,23 +3623,34 @@ onValue(ref(db, 'notifications'), async snapshot => {
               id: Math.floor(Date.now() % 100000),
               title: latestNotif.title || 'BD TOURNAMENT',
               body: latestNotif.body || 'নতুন নোটিফিকেশন এসেছে!',
-              schedule: { at: new Date(Date.now() + 100) }
+              channelId: 'tournament_urgent_popup',
+              smallIcon: 'ic_launcher',
+              largeIcon: 'ic_launcher', // সরাসরি আপনার অ্যাপের রঙিন লোগো
+              iconColor: '#2563eb',
+              schedule: { at: new Date(Date.now() + 50) }
             }
           ]
         });
       }
     } catch(err){}
 
-    // ২. অ্যাপের ভেতরের ব্যানার ও রিংটোন
+    // ২. ভাইব্রেশন
+    if (navigator.vibrate) {
+      try { navigator.vibrate([0, 500, 200, 500]); } catch(e){}
+    }
+
+    // ৩. রিংটোন
+    playPhoneRingtone(12000, latestNotif.title || '🔔 টুর্নামেন্ট অ্যালার্ট!', latestNotif.body || 'এখনই বিস্তারিত দেখুন');
+
+    // ৪. অ্যাপের ভেতর ব্যানার
     const bar = $('native-push-bar');
     if(bar){
       $('np-title').innerText = latestNotif.title || 'BD TOURNAMENT';
       $('np-body').innerText = latestNotif.body || 'New announcement';
       if(latestNotif.image) $('np-img').src = latestNotif.image;
       bar.classList.add('show');
-      setTimeout(() => bar.classList.remove('show'), 5000);
+      setTimeout(() => bar.classList.remove('show'), 6000);
     }
-    playPhoneRingtone(10000, latestNotif.title || '🔔 নোটিফিকেশন অ্যালার্ট!', latestNotif.body || 'বিস্তারিত দেখুন');
   }
 });
 console.log('%c BD TOURNAMENT v3.6.0 AI & Phone Ring Ready ⚡ ','background:#2563eb;color:#fff;font-weight:bold;');
