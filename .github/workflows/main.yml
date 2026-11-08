@@ -24,43 +24,55 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Install Dependencies & Setup App
+      - name: Install Dependencies & Setup Android
         run: |
           npm install
           npx cap add android
 
-      - name: Configure Icon & Google Services
+      - name: Auto Resize & Convert Icon to Clean PNGs
         run: |
-          # 1. Auto-detect and replace launcher icons
-          ICON_FILE=""
-          for f in "icon..png" "icon.png.png" "icon.png"; do
-            if [ -f "$f" ]; then
-              ICON_FILE="$f"
-              break
-            fi
-          done
+          python3 -m pip install pillow
+          python3 -c "
+          import os
+          from PIL import Image
 
-          if [ -n "$ICON_FILE" ]; then
-            echo "Found icon: $ICON_FILE"
-            for dir in android/app/src/main/res/mipmap-*; do
-              if [ "$dir" != "android/app/src/main/res/mipmap-anydpi-v26" ]; then
-                cp "$ICON_FILE" "$dir/ic_launcher.png" || true
-                cp "$ICON_FILE" "$dir/ic_launcher_round.png" || true
-                cp "$ICON_FILE" "$dir/ic_launcher_foreground.png" || true
-              fi
-            done
-            echo "All launcher icons replaced successfully!"
-          fi
+          icon_path = None
+          for f in ['icon..png', 'icon.png.png', 'icon.png', 'icon.jpg', 'icon.jpeg']:
+              if os.path.exists(f):
+                  icon_path = f
+                  break
 
-          # 2. Auto-detect and copy google-services.json
+          if icon_path:
+              print(f'Found icon: {icon_path}')
+              img = Image.open(icon_path).convert('RGBA')
+              sizes = {
+                  'mipmap-mdpi': 48,
+                  'mipmap-hdpi': 72,
+                  'mipmap-xhdpi': 96,
+                  'mipmap-xxhdpi': 144,
+                  'mipmap-xxxhdpi': 192
+              }
+              for folder, size in sizes.items():
+                  p = os.path.join('android/app/src/main/res', folder)
+                  if os.path.exists(p):
+                      r_img = img.resize((size, size), Image.Resampling.LANCZOS)
+                      r_img.save(os.path.join(p, 'ic_launcher.png'), 'PNG')
+                      r_img.save(os.path.join(p, 'ic_launcher_round.png'), 'PNG')
+                      fg_size = int(size * 108 / 48)
+                      fg_img = img.resize((fg_size, fg_size), Image.Resampling.LANCZOS)
+                      fg_img.save(os.path.join(p, 'ic_launcher_foreground.png'), 'PNG')
+              print('All Android icons created successfully!')
+          else:
+              print('No icon found, keeping default.')
+          "
+
+      - name: Setup Google Services (Safe Mode)
+        run: |
           if [ -f "google-services (1).json" ]; then
             cp "google-services (1).json" android/app/google-services.json || true
-            echo "Mapped google-services (1).json"
           elif [ -f "google-services.json" ]; then
             cp "google-services.json" android/app/google-services.json || true
-            echo "Mapped google-services.json"
           fi
-
           npx cap sync
 
       - name: Build Debug APK with Gradle
