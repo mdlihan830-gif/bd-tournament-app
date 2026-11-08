@@ -24,10 +24,20 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Install Dependencies & Add Android
+      - name: Install Dependencies & Setup App
         run: |
           npm install
           npx cap add android
+
+      - name: Auto Generate Launcher Icon
+        run: |
+          if [ -f "icon.png" ]; then
+            mkdir -p assets
+            cp icon.png assets/icon.png
+            npm install -D @capacitor/assets
+            npx @capacitor/assets generate --android --iconOnly
+            echo "Icon generated successfully!"
+          fi
           npx cap sync
 
       - name: Build Debug APK with Gradle
