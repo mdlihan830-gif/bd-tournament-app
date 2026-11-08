@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "937581957543",
+    "project_id": "bd-tournament21",
+    "storage_bucket": "bd-tournament21.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:937581957543:android:6601e87a6a3884b862e682",
+        "android_client_info": {
+          "package_name": "bdtournament.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDA5dw-P79v7n9jrLl_e17ubgl1xQQlvNo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
