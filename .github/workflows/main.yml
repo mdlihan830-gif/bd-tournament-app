@@ -29,15 +29,33 @@ jobs:
           npm install
           npx cap add android
 
-      - name: Auto Generate Launcher Icon
+      - name: Auto Fix Names & Generate Launcher Icon
         run: |
-          if [ -f "icon.png" ]; then
-            mkdir -p assets
-            cp icon.png assets/icon.png
+          mkdir -p assets
+          # Auto-detect your uploaded icon file
+          if [ -f "icon..png" ]; then
+            cp "icon..png" assets/icon.png
+          elif [ -f "icon.png.png" ]; then
+            cp "icon.png.png" assets/icon.png
+          elif [ -f "icon.png" ]; then
+            cp "icon.png" assets/icon.png
+          fi
+
+          if [ -f "assets/icon.png" ]; then
             npm install -D @capacitor/assets
             npx @capacitor/assets generate --android --iconOnly
-            echo "Icon generated successfully!"
+            echo "Logo generated successfully!"
           fi
+
+          # Auto-detect google services file even with (1)
+          if [ -f "google-services (1).json" ]; then
+            cp "google-services (1).json" android/app/google-services.json
+            echo "Google services mapped successfully!"
+          elif [ -f "google-services.json" ]; then
+            cp "google-services.json" android/app/google-services.json
+            echo "Google services mapped successfully!"
+          fi
+
           npx cap sync
 
       - name: Build Debug APK with Gradle
