@@ -24,9 +24,27 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Install Dependencies & Setup Android
+      - name: Auto Sync Package Name & Setup Android
         run: |
           npm install
+          
+          # Automatically detect package name from google-services.json
+          python3 -c "
+          import json, os, glob
+          gs_files = glob.glob('*google-services*.json')
+          if gs_files:
+              with open(gs_files[0]) as f:
+                  data = json.load(f)
+              pkg = data['client'][0]['client_info']['android_client_info']['package_name']
+              print(f'Matched Firebase Package Name: {pkg}')
+              with open('capacitor.config.json') as f:
+                  cfg = json.load(f)
+              cfg['appId'] = pkg
+              with open('capacitor.config.json', 'w') as f:
+                  json.dump(cfg, f, indent=2)
+              print('Synchronized capacitor.config.json successfully!')
+          "
+          
           npx cap add android
 
       - name: Auto Resize & Convert Icon to Clean PNGs
@@ -62,17 +80,17 @@ jobs:
                       fg_img = img.resize((fg_size, fg_size), Image.Resampling.LANCZOS)
                       fg_img.save(os.path.join(p, 'ic_launcher_foreground.png'), 'PNG')
               print('All Android icons created successfully!')
-          else:
-              print('No icon found, keeping default.')
           "
 
-      - name: Setup Google Services (Safe Mode)
+      - name: Inject Google Services
         run: |
-          if [ -f "google-services (1).json" ]; then
-            cp "google-services (1).json" android/app/google-services.json || true
-          elif [ -f "google-services.json" ]; then
-            cp "google-services.json" android/app/google-services.json || true
-          fi
+          for f in *google-services*.json; do
+            if [ -f "$f" ]; then
+              cp "$f" android/app/google-services.json
+              echo "Injected $f into android/app/google-services.json"
+              break
+            fi
+          done
           npx cap sync
 
       - name: Build Debug APK with Gradle
