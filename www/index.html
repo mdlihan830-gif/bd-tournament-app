@@ -3575,9 +3575,18 @@ function toggleVoiceRecognition() {
   speechRecognitionInstance.start();
 }
 
-/* ---------- SERVICE WORKER PUSH NOTIFICATION & PHONE RINGTONE ---------- */
+/* ---------- NATIVE ANDROID SYSTEM NOTIFICATION TRIGGER ---------- */
+// অ্যাপ ওপেন হলেই ফোনের আসল নোটিফিকেশন পারমিশন চাইবে
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+      await window.Capacitor.Plugins.LocalNotifications.requestPermissions();
+    }
+  } catch(e){}
+});
+
 let isInitialNotifLoad = true;
-onValue(ref(db, 'notifications'), snapshot => {
+onValue(ref(db, 'notifications'), async snapshot => {
   const data = snapshot.val();
   if (!data) return;
   const notifList = Object.values(data);
@@ -3591,23 +3600,35 @@ onValue(ref(db, 'notifications'), snapshot => {
 
   if (latestNotif && latestNotif.ts > (window._lastNotifTimestamp || 0)) {
     window._lastNotifTimestamp = latestNotif.ts;
-    
-    // Top Push Popup
+
+    // ১. ফোনের ওপরের ড্রয়ারে (Status Bar) আসল অ্যান্ড্রয়েড নোটিফিকেশন ফেলবে
+    try {
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+        await window.Capacitor.Plugins.LocalNotifications.schedule({
+          notifications: [
+            {
+              id: Math.floor(Date.now() % 100000),
+              title: latestNotif.title || 'BD TOURNAMENT',
+              body: latestNotif.body || 'নতুন নোটিফিকেশন এসেছে!',
+              schedule: { at: new Date(Date.now() + 100) }
+            }
+          ]
+        });
+      }
+    } catch(err){}
+
+    // ২. অ্যাপের ভেতরের ব্যানার ও রিংটোন
     const bar = $('native-push-bar');
     if(bar){
       $('np-title').innerText = latestNotif.title || 'BD TOURNAMENT';
       $('np-body').innerText = latestNotif.body || 'New announcement';
       if(latestNotif.image) $('np-img').src = latestNotif.image;
       bar.classList.add('show');
-      playAudioTone('coin');
       setTimeout(() => bar.classList.remove('show'), 5000);
     }
-
-    // Play phone chime ringtone & vibration
-    playPhoneRingtone(10000, latestNotif.title || '🔔 নতুন টুর্নামেন্ট নোটিফিকেশন!', latestNotif.body || 'এখনই অ্যাপে বিস্তারিত দেখুন');
+    playPhoneRingtone(10000, latestNotif.title || '🔔 নোটিফিকেশন অ্যালার্ট!', latestNotif.body || 'বিস্তারিত দেখুন');
   }
 });
-
 console.log('%c BD TOURNAMENT v3.6.0 AI & Phone Ring Ready ⚡ ','background:#2563eb;color:#fff;font-weight:bold;');
 </script>
 </body>
