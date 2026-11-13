@@ -24,25 +24,48 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Install Dependencies & Setup Capacitor Android
+    - name: Install Dependencies & Auto Match Package Name
       run: |
         npm install --legacy-peer-deps
         npm install --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/android
+
+        # Auto Detect Package Name from Firebase JSON
+        node -e '
+        const fs = require("fs");
+        let gFile = fs.existsSync("google-services.json") ? "google-services.json" : (fs.existsSync("google-services (1).json") ? "google-services (1).json" : null);
+        let pkg = "bdtournament.com";
+        if (gFile) {
+          try {
+            const data = JSON.parse(fs.readFileSync(gFile, "utf8"));
+            pkg = data.client[0].client_info.android_client_info.package_name;
+          } catch(e) {}
+        }
+        console.log("Matched Firebase Package Name:", pkg);
+        let cap = {};
+        try { cap = JSON.parse(fs.readFileSync("capacitor.config.json", "utf8")); } catch(e){}
+        cap.appId = pkg;
+        cap.appName = cap.appName || "BD TOURNAMENT";
+        cap.webDir = "www";
+        fs.writeFileSync("capacitor.config.json", JSON.stringify(cap, null, 2));
+        '
+
+        # Prepare Web Files
         mkdir -p www
         cp index.html www/ 2>/dev/null || true
         cp -r assets www/ 2>/dev/null || true
-        if [ ! -d "android" ]; then
-          npx cap add android
-        fi
-        npx cap sync android
 
-    - name: Inject Google Services
-      run: |
+        # Clean Setup Android with Exact Package Name
+        rm -rf android
+        npx cap add android
+
+        # Inject Google Services JSON
         if [ -f "google-services.json" ]; then
           cp google-services.json android/app/
         elif [ -f "google-services (1).json" ]; then
           cp "google-services (1).json" android/app/google-services.json
         fi
+
+        npx cap sync android
 
     - name: Build Debug APK with Gradle
       run: |
