@@ -1,0 +1,6 @@
+{
+  "name": "BD TOURNAMENT",
+  "description": "BD TOURNAMENT — Pro Esports Cyber Gaming & Tournament Arena. Play, win, and claim instant prizes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

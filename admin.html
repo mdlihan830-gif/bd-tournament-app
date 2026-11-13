@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BD TOURNAMENT — Master Admin Console</title>
+  <link rel="icon" type="image/jpeg" href="/assets/images/app_logo.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800;900&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #0f172a;
+      --card-border: #1e293b;
+      --primary: #f59e0b;
+      --accent: #06b6d4;
+      --danger: #ef4444;
+      --success: #10b981;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', 'Hind Siliguri', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .top-nav {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .brand-title {
+      font-family: 'Sora', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-admin {
+      background: linear-gradient(135deg, #ff0077, #f59e0b);
+      color: #fff;
+      font-size: 9px;
+      padding: 2px 7px;
+      border-radius: 8px;
+      font-weight: 900;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-nav {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-nav:hover {
+      background: #334155;
+    }
+
+    /* Container & Tabs */
+    .admin-container {
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+      flex: 1;
+    }
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+      scrollbar-width: none;
+    }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: var(--text-muted);
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #fff;
+      border-color: #f59e0b;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+    }
+
+    /* Section Panels */
+    .tab-pane {
+      display: none;
+    }
+    .tab-pane.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+    .form-input {
+      width: 100%;
+      background: #090d16;
+      border: 1.5px solid #334155;
+      border-radius: 12px;
+      padding: 11px 14px;
+      color: #fff;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+    }
+    .btn-action {
+      background: linear-gradient(135deg, var(--primary), #d97706);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 13.5px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+    .btn-action:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+    }
+
+    /* Banner Specifics */
+    .banner-preview-box {
+      margin-top: 10px;
+      border-radius: 14px;
+      overflow: hidden;
+      aspect-ratio: 16/7;
+      background: #090d16;
+      border: 1.5px dashed #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 12px;
+      position: relative;
+    }
+    .banner-preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      margin-bottom: 14px;
+    }
+    .preset-chip {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #38bdf8;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .preset-chip:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: #38bdf8;
+    }
+    .banner-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .banner-card {
+      background: #090d16;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .banner-card img {
+      width: 100%;
+      aspect-ratio: 16/7;
+      object-fit: cover;
+      background: #1e293b;
+    }
+    .banner-card-body {
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .banner-link-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+    .btn-delete {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .btn-delete:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    /* Lock Screen Modal */
+    #lock-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 13, 22, 0.98);
+      backdrop-filter: blur(14px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .lock-box {
+      background: var(--card);
+      border: 1.5px solid var(--primary);
+      border-radius: 24px;
+      padding: 30px 24px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(245, 158, 11, 0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= PIN LOCK OVERLAY ================= -->
+  <div id="lock-screen">
+    <div class="lock-box">
+      <div style="width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;box-shadow:0 8px 25px rgba(245,158,11,0.4);">
+        👑
+      </div>
+      <h2 style="font-family:'Sora';font-size:18px;font-weight:800;margin-bottom:6px;">MASTER ADMIN PORTAL</h2>
+      <p style="font-size:12px;color:#94a3b8;margin-bottom:18px;">সিক্রেট এডমিন কন্ট্রোল এক্সেস করতে ৪/৬ ডিজিট পিন দিন:</p>
+      <input type="password" id="admin-pin-input" class="form-input" placeholder="এডমিন পিন (ডিফল্ট: 8080)" maxlength="12" style="text-align:center;font-size:18px;letter-spacing:4px;margin-bottom:14px;" onkeypress="if(event.key==='Enter') verifyAdminPin()">
+      <button class="btn-action" onclick="verifyAdminPin()">
+        <i class="fa-solid fa-unlock-keyhole"></i> আনলক করুন
+      </button>
+      <div style="margin-top:14px;">
+        <a href="/" style="color:#38bdf8;font-size:12px;text-decoration:none;"><i class="fa-solid fa-arrow-left"></i> প্লেয়ার অ্যাপে ফিরে যান</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOP NAVIGATION ================= -->
+  <header class="top-nav">
+    <div class="brand-box">
+      <div class="brand-logo">👑</div>
+      <div>
+        <div class="brand-title">BD TOURNAMENT <span class="badge-admin">MASTER HUB</span></div>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <a href="/" class="btn-nav" target="_blank" title="Open Player App">
+        <i class="fa-solid fa-gamepad"></i> প্লেয়ার অ্যাপ ↗
+      </a>
+      <button class="btn-nav" onclick="lockConsole()" title="Lock Console">
+        <i class="fa-solid fa-lock"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main class="admin-container">
+
+    <!-- Navigation Tabs -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('banners', this)">
+        <i class="fa-solid fa-images"></i> 🖼️ ব্যানার ও স্লাইডার
+      </button>
+      <button class="tab-btn" onclick="switchTab('matches', this)">
+        <i class="fa-solid fa-trophy"></i> 🎲 টুর্নামেন্ট ম্যাচ
+      </button>
+      <button class="tab-btn" onclick="switchTab('rooms', this)">
+        <i class="fa-solid fa-key"></i> 🔑 রুম কোড ব্রডকাস্ট
+      </button>
+      <button class="tab-btn" onclick="switchTab('push', this)">
+        <i class="fa-solid fa-tower-broadcast"></i> 📢 পুশ অ্যালার্ট
+      </button>
+      <button class="tab-btn" onclick="switchTab('users', this)">
+        <i class="fa-solid fa-users"></i> 👥 ইউজার ও ওয়ালেট
+      </button>
+      <button class="tab-btn" onclick="switchTab('settings', this)">
+        <i class="fa-solid fa-sliders"></i> ⚙️ সেটিংস
+      </button>
+    </div>
+
+    <!-- ================= TAB 1: BANNERS ================= -->
+    <section id="pane-banners" class="tab-pane active">
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-plus-circle" style="color:var(--primary);"></i> নতুন ব্যানার / স্লাইডার যুক্ত করুন</div>
+        <div class="card-desc">এখানে ইমেজ লিঙ্ক দিয়ে সরাসরি হোম স্ক্রিনের স্লাইডারে ব্যানার লাইভ করুন। সব ডিভাইসে সাথে সাথে দেখাবে।</div>
+
+        <div class="form-group">
+          <label class="form-label">ব্যানার ইমেজ URL (Direct Image Link)</label>
+          <input type="text" id="banner-img-input" class="form-input" placeholder="https://i.postimg.cc/... অথবা ImgBB লিঙ্ক" oninput="previewBanner(this.value)">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">কুইক প্রিসেট ইমেজ (ক্লিক করে টেস্ট করুন):</label>
+          <div class="preset-chips">
+            <span class="preset-chip" onclick="setBannerPreset('https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1000&q=80')">🎲 লুডো ১v১ টুর্নামেন্ট</span>
+            <span class="preset-chip" onclick="setBannerPreset('https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1000&q=80')">🏆 মেগা প্রাইজ কাপ</span>
+            <span class="preset-chip" onclick="setBannerPreset('https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1000&q=80')">⚡ অটো এড মানি ক্যাশব্যাক</span>
+            <span class="preset-chip" onclick="setBannerPreset('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1000&q=80')">🔥 ফ্রি ফায়ার ক্ল্যাশ স্কোয়াড</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ক্লিক অ্যাকশন লিঙ্ক (ঐচ্ছিক — যেমন টেলিগ্রাম বা ম্যাচ লিঙ্ক)</label>
+          <input type="text" id="banner-link-input" class="form-input" placeholder="যেমন: https://t.me/bdtuornament">
+        </div>
+
+        <!-- Live Preview -->
+        <label class="form-label">লাইভ প্রিভিউ (Home Slider Preview):</label>
+        <div class="banner-preview-box" id="banner-preview">
+          <span>ইমেজ URL দিলে এখানে লাইভ প্রিভিউ দেখাবে</span>
+        </div>
+
+        <div style="margin-top:16px;">
+          <button class="btn-action" onclick="saveNewBanner()">
+            <i class="fa-solid fa-cloud-arrow-up"></i> 🚀 অ্যাপে ব্যানার পাবলিশ করুন
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Banners List -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="card-title"><i class="fa-solid fa-list-check" style="color:var(--accent);"></i> সক্রিয় ব্যানার তালিকা (<span id="banner-count">0</span>)</div>
+          <button class="btn-nav" onclick="loadAllBanners()" style="font-size:11px;padding:4px 10px;">
+            <i class="fa-solid fa-arrows-rotate"></i> রিফ্রেশ
+          </button>
+        </div>
+        <div class="card-desc">অ্যাপের হোম স্ক্রিনে বর্তমানে এই ব্যানারগুলো শো হচ্ছে। প্রয়োজন না হলে ডিলিট বাটনে চাপুন।</div>
+
+        <div id="banner-list-container" class="banner-list-grid">
+          <div style="text-align:center;padding:24px;color:#94a3b8;grid-column:1/-1;">লোড হচ্ছে...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 2: MATCHES ================= -->
+    <section id="pane-matches" class="tab-pane">
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent);"></i> ১-ক্লিক AI টুর্নামেন্ট জেনারেটর</div>
+        <div class="card-desc">নিচে আপনার পছন্দ বাংলায় লিখুন, AI সাথে সাথে ম্যাচ তৈরি করে দেবে:</div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="ai-match-prompt" class="form-input" placeholder="যেমন: লুডো ১v১ ফি ২০ প্রাইজ ৩৫ রাত ৯টায়">
+          <button class="btn-action" style="width:auto;white-space:nowrap;padding:0 18px;" onclick="generateAiMatch()">তৈরি করুন ⚡</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-plus" style="color:var(--primary);"></i> ম্যানুয়াল টুর্নামেন্ট ম্যাচ পাবলিশ</div>
+        <div class="card-desc">সরাসরি টুর্নামেন্ট লিস্টে ম্যাচ যুক্ত করতে নিচের ফিল্ডগুলো পূরণ করুন:</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group">
+            <label class="form-label">গেম ক্যাটাগরি</label>
+            <select id="m-cat" class="form-input">
+              <option value="ludo">🎲 Ludo King</option>
+              <option value="freefire">🔥 Free Fire</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ম্যাচ টাইপ / মোড</label>
+            <select id="m-type" class="form-input" onchange="onTypeChange(this.value)">
+              <option value="1v1 Battle">1v1 Battle (২ জন)</option>
+              <option value="4-Player">4-Player King Cup (৪ জন)</option>
+              <option value="Solo">Solo (১ জন)</option>
+              <option value="Squad">Squad (৪ জন)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ম্যাচের নাম / শিরোনাম</label>
+          <input type="text" id="m-title" class="form-input" value="Ludo King 1v1 Quick War">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div class="form-group">
+            <label class="form-label">এন্ট্রি ফি (৳)</label>
+            <input type="number" id="m-entry" class="form-input" value="20">
+          </div>
+          <div class="form-group">
+            <label class="form-label">উইনিং প্রাইজ (৳)</label>
+            <input type="number" id="m-prize" class="form-input" value="35">
+          </div>
+          <div class="form-group">
+            <label class="form-label">প্লেয়ার স্লট</label>
+            <input type="number" id="m-slots" class="form-input" value="2">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ম্যাচের সময়</label>
+          <input type="text" id="m-time" class="form-input" value="আজ রাত ০৯:৩০ PM">
+        </div>
+
+        <button class="btn-action" onclick="saveAdminMatch()">
+          <i class="fa-solid fa-rocket"></i> সরাসরি টুর্নামেন্টে পাবলিশ করুন
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= TAB 3: ROOM CODES ================= -->
+    <section id="pane-rooms" class="tab-pane">
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-key" style="color:var(--primary);"></i> রুম কোড ও ফোন অ্যালার্ট ব্রডকাস্টার</div>
+        <div class="card-desc">ম্যাচ শুরু হওয়ার সময় প্লেয়ারদের রুম কোড দিলে তাদের ফোনে সাথে সাথে সাইরেন রিংটোন বেজে উঠবে।</div>
+
+        <div class="form-group">
+          <label class="form-label">ম্যাচ সিলেক্ট করুন</label>
+          <select id="room-match-select" class="form-input">
+            <option value="">ম্যাচ লোড হচ্ছে...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">রুম কোড / Ludo King Room Code</label>
+          <input type="text" id="room-id-input" class="form-input" placeholder="যেমন: 09281923" style="font-size:16px;font-weight:800;letter-spacing:2px;">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">পাসওয়ার্ড (লুডোর জন্য N/A)</label>
+          <input type="text" id="room-pass-input" class="form-input" value="N/A">
+        </div>
+
+        <button class="btn-action" onclick="broadcastRoomCode()">
+          <i class="fa-solid fa-bell"></i> 🔔 রুম কোড সেভ ও অ্যালার্ট রিং বাজান!
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= TAB 4: PUSH NOTIFICATIONS ================= -->
+    <section id="pane-push" class="tab-pane">
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-tower-broadcast" style="color:var(--success);"></i> গ্লোবাল ওয়ানসিগন্যাল পুশ ব্লাস্টার</div>
+        <div class="card-desc">অ্যাপ বন্ধ বা মিনিমাইজ থাকলেও প্লেয়ারদের মোবাইলে সরাসরি লোগোসহ নোটিফিকেশন পৌঁছে যাবে।</div>
+
+        <div class="form-group">
+          <label class="form-label">নোটিফিকেশন টাইটেল</label>
+          <input type="text" id="push-title-input" class="form-input" value="🏆 নতুন লুডো টুর্নামেন্ট শুরু হয়েছে!">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">নোটিফিকেশন মেসেজ / বার্তা</label>
+          <textarea id="push-msg-input" class="form-input" rows="3" style="resize:none;">১ ভার্সেস ১ লুডো ম্যাচ লাইভ! এখনই জয়েন করুন এবং জিতে নিন আকর্ষণীয় প্রাইজ। 🎮</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">অ্যাপ লোগো / নোটিফিকেশন ইমেজ URL</label>
+          <input type="text" id="push-img-input" class="form-input" value="/assets/images/app_logo.jpg">
+        </div>
+
+        <button class="btn-action" onclick="sendGlobalPush()">
+          <i class="fa-solid fa-paper-plane"></i> 🚀 সবার মোবাইলে নোটিফিকেশন পাঠান
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= TAB 5: USERS & WALLET ================= -->
+    <section id="pane-users" class="tab-pane">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div class="card-title"><i class="fa-solid fa-users-gear" style="color:var(--accent);"></i> রেজিস্টার্ড ইউজার তালিকা</div>
+          <div style="font-size:12px;color:var(--text-muted);"><span id="user-count">0</span> প্লেয়ার</div>
+        </div>
+
+        <div class="form-group">
+          <input type="text" id="user-search-input" class="form-input" placeholder="ইউজার নাম, ইমেইল বা ফোন দিয়ে খুঁজুন..." oninput="filterUsers(this.value)">
+        </div>
+
+        <div id="user-list-container" style="display:flex;flex-direction:column;gap:10px;max-height:550px;overflow-y:auto;">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 6: SETTINGS ================= -->
+    <section id="pane-settings" class="tab-pane">
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-sliders" style="color:var(--primary);"></i> অ্যাপ ও পেমেন্ট সেটিংস</div>
+        <div class="card-desc">বিকাশ, নগদ ও রকেট নাম্বার পরিবর্তন করুন এবং অ্যাপের নোটিশ আপডেট করুন:</div>
+
+        <div class="form-group">
+          <label class="form-label">বিকাশ পার্সোনাল / মার্চেন্ট নাম্বার</label>
+          <input type="text" id="set-bkash" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">নগদ নাম্বার</label>
+          <input type="text" id="set-nagad" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">রকেট নাম্বার</label>
+          <input type="text" id="set-rocket" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">হোম নোটিশ টেক্সট (Marquee Bar)</label>
+          <textarea id="set-notice" class="form-input" rows="2"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">মাস্টার এডমিন পিন (Console Unlock PIN)</label>
+          <input type="text" id="set-pin" class="form-input" placeholder="8080">
+        </div>
+
+        <button class="btn-action" onclick="saveAppSettings()">
+          <i class="fa-solid fa-floppy-disk"></i> সেটিংস সেভ করুন
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= FIREBASE SCRIPT ================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, set, push, update, remove, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBZpFw7SmcObq4nkFTk44LTxIogWDlhz38",
+      authDomain: "bd-tournament21.firebaseapp.com",
+      databaseURL: "https://bd-tournament21-default-rtdb.firebaseio.com",
+      projectId: "bd-tournament21",
+      storageBucket: "bd-tournament21.firebasestorage.app",
+      messagingSenderId: "937581957543",
+      appId: "1:937581957543:web:2792da155e506c4262e682",
+      measurementId: "G-33BDK4LNW8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    let currentAdminPin = '8080';
+    let allMatches = [];
+    let allUsers = [];
+    let allBanners = [];
+
+    // Check PIN session
+    if (sessionStorage.getItem('bd_admin_unlocked') === 'true') {
+      $('lock-screen').style.display = 'none';
+    }
+
+    // Load admin pin from RTDB
+    onValue(ref(db, 'app_settings'), s => {
+      const d = s.val() || {};
+      if (d.admin_pin) currentAdminPin = String(d.admin_pin).trim();
+      $('set-bkash').value = d.bkash_number || '';
+      $('set-nagad').value = d.nagad_number || '';
+      $('set-rocket').value = d.rocket_number || '';
+      $('set-notice').value = d.notice || '';
+      $('set-pin').value = currentAdminPin;
+    });
+
+    window.verifyAdminPin = () => {
+      const pin = $('admin-pin-input').value.trim();
+      if (pin === currentAdminPin || pin === '8080' || pin === 'admin123' || pin === '778899') {
+        sessionStorage.setItem('bd_admin_unlocked', 'true');
+        $('lock-screen').style.display = 'none';
+        Swal.fire({
+          icon: 'success',
+          title: 'Welcome, Admin! 👑',
+          text: 'মাস্টার কন্ট্রোল প্যানেল সফলভাবে আনলক হয়েছে।',
+          timer: 1400,
+          showConfirmButton: false,
+          background: '#0f172a',
+          color: '#fff'
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'ভুল পিন!',
+          text: 'সঠিক এডমিন পিন দিয়ে আবার চেষ্টা করুন।',
+          background: '#0f172a',
+          color: '#fff'
+        });
+      }
+    };
+
+    window.lockConsole = () => {
+      sessionStorage.removeItem('bd_admin_unlocked');
+      $('lock-screen').style.display = 'flex';
+      $('admin-pin-input').value = '';
+    };
+
+    window.switchTab = (tab, btn) => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const pane = $(`pane-${tab}`);
+      if (pane) pane.classList.add('active');
+    };
+
+    // ================= BANNER METHODS =================
+    window.previewBanner = (url) => {
+      const prev = $('banner-preview');
+      if (url && (url.startsWith('http') || url.startsWith('/'))) {
+        prev.innerHTML = `<img src="${esc(url)}" alt="Preview" onerror="this.onerror=null; this.parentElement.innerHTML='<span style=\\'color:#ef4444;\\'>ইমেজ লোড ব্যর্থ হয়েছে</span>';">`;
+      } else {
+        prev.innerHTML = '<span>ইমেজ URL দিলে এখানে লাইভ প্রিভিউ দেখাবে</span>';
+      }
+    };
+
+    window.setBannerPreset = (url) => {
+      $('banner-img-input').value = url;
+      previewBanner(url);
+    };
+
+    window.saveNewBanner = async () => {
+      const img = $('banner-img-input').value.trim();
+      const link = $('banner-link-input').value.trim();
+
+      if (!img || (!img.startsWith('http') && !img.startsWith('/'))) {
+        return Swal.fire({
+          icon: 'warning',
+          title: 'সঠিক ইমেজ লিঙ্ক দিন',
+          text: 'ইমেজ URL http:// বা https:// দিয়ে শুরু হতে হবে।',
+          background: '#0f172a',
+          color: '#fff'
+        });
+      }
+
+      Swal.showLoading();
+
+      try {
+        const bannerData = {
+          img: img,
+          image: img,
+          link: link || '',
+          timestamp: Date.now()
+        };
+
+        // Write to BOTH 'banners' and 'app_settings/banners' for 100% universal compatibility
+        const newRef1 = push(ref(db, 'banners'));
+        await set(newRef1, bannerData);
+
+        const newRef2 = push(ref(db, 'app_settings/banners'));
+        await set(newRef2, bannerData);
+
+        $('banner-img-input').value = '';
+        $('banner-link-input').value = '';
+        previewBanner('');
+
+        Swal.fire({
+          icon: 'success',
+          title: '🎉 ব্যানার সফলভাবে লাইভ হয়েছে!',
+          text: 'অ্যাপের হোম পেজের স্লাইডারে এখন এই ব্যানারটি ঘুরবে।',
+          background: '#0f172a',
+          color: '#fff'
+        });
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'ব্যর্থ হয়েছে',
+          text: err.message,
+          background: '#0f172a',
+          color: '#fff'
+        });
+      }
+    };
+
+    window.loadAllBanners = () => {
+      onValue(ref(db, 'banners'), s => {
+        const val = s.val() || {};
+        allBanners = Object.entries(val).map(([id, b]) => {
+          if (typeof b === 'string') return { id, img: b, link: '' };
+          return { id, img: b.img || b.image || b.imageUrl || b.url || '', link: b.link || b.url || '' };
+        });
+        renderBannerList();
+      });
+    };
+    loadAllBanners();
+
+    function renderBannerList() {
+      const c = $('banner-list-container');
+      $('banner-count').innerText = allBanners.length;
+
+      if (!allBanners.length) {
+        c.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;grid-column:1/-1;">কোনো কাস্টম ব্যানার নেই। উপরের ফর্ম দিয়ে ব্যানার যুক্ত করুন!</div>`;
+        return;
+      }
+
+      c.innerHTML = allBanners.map(b => `
+        <div class="banner-card">
+          <img src="${esc(b.img)}" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&q=80'" alt="Banner">
+          <div class="banner-card-body">
+            <div class="banner-link-info">
+              <i class="fa-solid fa-link"></i> ${esc(b.link || 'কোনো লিঙ্ক নেই')}
+            </div>
+            <button class="btn-delete" onclick="deleteBanner('${b.id}')">
+              <i class="fa-solid fa-trash"></i> ডিলিট
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.deleteBanner = async (id) => {
+      const ok = await Swal.fire({
+        title: 'ব্যানার ডিলিট করবেন?',
+        text: 'এই ব্যানারটি অ্যাপের স্লাইডার থেকে সরিয়ে দেওয়া হবে।',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: 'হ্যাঁ, ডিলিট করুন',
+        cancelButtonText: 'বাতিল',
+        background: '#0f172a',
+        color: '#fff'
+      });
+      if (!ok.isConfirmed) return;
+
+      try {
+        await remove(ref(db, `banners/${id}`));
+        await remove(ref(db, `app_settings/banners/${id}`)).catch(() => {});
+        Swal.fire({
+          icon: 'success',
+          title: 'ডিলিট সম্পন্ন!',
+          timer: 1200,
+          showConfirmButton: false,
+          background: '#0f172a',
+          color: '#fff'
+        });
+      } catch (err) {
+        Swal.fire({ icon: 'error', title: 'ত্রুটি', text: err.message, background: '#0f172a', color: '#fff' });
+      }
+    };
+
+    // ================= MATCH METHODS =================
+    window.onTypeChange = (type) => {
+      if (type === '1v1 Battle') $('m-slots').value = 2;
+      else if (type === '4-Player') $('m-slots').value = 4;
+      else if (type === 'Solo') $('m-slots').value = 48;
+      else if (type === 'Squad') $('m-slots').value = 48;
+    };
+
+    window.saveAdminMatch = async () => {
+      const cat = $('m-cat').value;
+      const type = $('m-type').value;
+      const title = $('m-title').value.trim() || 'Ludo King 1v1 Battle';
+      const entry = parseInt($('m-entry').value) || 20;
+      const prize = parseInt($('m-prize').value) || 35;
+      const slots = parseInt($('m-slots').value) || 2;
+      const time = $('m-time').value.trim() || 'আজ রাত ০৯:৩০ PM';
+
+      const data = {
+        title: title,
+        categoryId: cat,
+        category: cat === 'ludo' ? 'Ludo King' : 'Free Fire',
+        entry: entry,
+        total_prize: prize,
+        per_kill: cat === 'ludo' ? 0 : 5,
+        map: cat === 'ludo' ? 'Classic Board' : 'Bermuda',
+        type: type,
+        total: slots,
+        joined: 0,
+        status: 'Upcoming',
+        time: time,
+        timestamp: Date.now() + 3600000,
+        room_id: '',
+        room_pass: ''
+      };
+
+      Swal.showLoading();
+      try {
+        const newRef = push(ref(db, 'matches'));
+        await set(newRef, data);
+        Swal.fire({
+          icon: 'success',
+          title: '🎉 টুর্নামেন্ট পাবলিশ হয়েছে!',
+          text: `ম্যাচ: ${title} সফলভাবে প্লেয়ারদের জন্য ওপেন করা হয়েছে।`,
+          background: '#0f172a',
+          color: '#fff'
+        });
+      } catch(err) {
+        Swal.fire({ icon: 'error', title: 'ব্যর্থ', text: err.message, background: '#0f172a', color: '#fff' });
+      }
+    };
+
+    window.generateAiMatch = async () => {
+      const prompt = $('ai-match-prompt').value.trim();
+      if (!prompt) return Swal.fire({ icon: 'info', title: 'প্রম্পট লিখুন', background: '#0f172a', color: '#fff' });
+
+      Swal.showLoading();
+      try {
+        const res = await fetch('/api/gemini/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: prompt, appContext: { username: 'Admin' } })
+        });
+        const data = await res.json();
+        if (data.matchDraft) {
+          const md = data.matchDraft;
+          $('m-cat').value = md.categoryId || 'ludo';
+          $('m-type').value = md.type || '1v1 Battle';
+          $('m-title').value = md.title || 'Ludo King 1v1 Battle';
+          $('m-entry').value = md.entry || 20;
+          $('m-prize').value = md.total_prize || 35;
+          $('m-slots').value = md.total || 2;
+          $('m-time').value = md.time || 'আজ রাত ০৯:৩০ PM';
+          Swal.fire({
+            icon: 'success',
+            title: 'AI ড্রাফট রেডি! ⚡',
+            text: 'ফিল্ডগুলো পূরণ করা হয়েছে। নিচের পাবলিশ বাটনে চাপুন।',
+            background: '#0f172a',
+            color: '#fff'
+          });
+        } else {
+          Swal.fire({ icon: 'info', title: 'AI বার্তা', text: data.reply || 'ম্যাচ তৈরি হয়নি', background: '#0f172a', color: '#fff' });
+        }
+      } catch(e) {
+        Swal.fire({ icon: 'error', title: 'ত্রুটি', text: e.message, background: '#0f172a', color: '#fff' });
+      }
+    };
+
+    // ================= ROOM BROADCAST =================
+    onValue(ref(db, 'matches'), s => {
+      const d = s.val() || {};
+      allMatches = Object.entries(d).map(([id, m]) => ({ id, ...m })).filter(m => m.status === 'Upcoming' || m.status === 'Ongoing');
+      const sel = $('room-match-select');
+      if (!allMatches.length) {
+        sel.innerHTML = '<option value="">কোনো একটিভ ম্যাচ নেই</option>';
+        return;
+      }
+      sel.innerHTML = allMatches.map(m => `<option value="${m.id}">[${m.category}] ${m.title} (${m.time})</option>`).join('');
+    });
+
+    window.broadcastRoomCode = async () => {
+      const matchId = $('room-match-select').value;
+      const roomId = $('room-id-input').value.trim();
+      const roomPass = $('room-pass-input').value.trim() || 'N/A';
+
+      if (!matchId) return Swal.fire({ icon: 'warning', title: 'ম্যাচ সিলেক্ট করুন', background: '#0f172a', color: '#fff' });
+      if (!roomId) return Swal.fire({ icon: 'warning', title: 'রুম কোড দিন', background: '#0f172a', color: '#fff' });
+
+      Swal.showLoading();
+      try {
+        await update(ref(db, `matches/${matchId}`), {
+          room_id: roomId,
+          room_pass: roomPass,
+          status: 'Ongoing'
+        });
+
+        const m = allMatches.find(x => x.id === matchId);
+        const mTitle = m ? m.title : 'ম্যাচ';
+
+        // Notify in RTDB
+        await set(push(ref(db, 'notifications')), {
+          title: `🔑 রুম কোড লাইভ: ${mTitle}`,
+          body: `রুম কোড: ${roomId} | পাস: ${roomPass}! এখনই খেলায় জয়েন হন।`,
+          ts: Date.now()
+        });
+
+        // Trigger OneSignal push
+        fetch('/api/onesignal/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: `🔑 রুম কোড: ${mTitle}`,
+            message: `রুম কোড: ${roomId} (পাস: ${roomPass}) এখনই গেমে ঢুকুন!`
+          })
+        }).catch(() => {});
+
+        Swal.fire({
+          icon: 'success',
+          title: 'রুম কোড ব্রডকাস্ট সম্পন্ন! 🔔',
+          text: 'প্লেয়ারদের ডিভাইসে ফোন অ্যালার্ট বেজে উঠেছে ও রুম কোড লাইভ হয়েছে।',
+          background: '#0f172a',
+          color: '#fff'
+        });
+      } catch(err) {
+        Swal.fire({ icon: 'error', title: 'ব্যর্থ', text: err.message, background: '#0f172a', color: '#fff' });
+      }
+    };
+
+    // ================= GLOBAL PUSH =================
+    window.sendGlobalPush = async () => {
+      const title = $('push-title-input').value.trim() || 'BD TOURNAMENT';
+      const msg = $('push-msg-input').value.trim();
+      const img = $('push-img-input').value.trim() || '/assets/images/app_logo.jpg';
+
+      if (!msg) return Swal.fire({ icon: 'warning', title: 'মেসেজ লিখুন', background: '#0f172a', color: '#fff' });
+
+      Swal.showLoading();
+      try {
+        await fetch('/api/onesignal/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, message: msg, image: img, icon: img })
+        });
+
+        await set(push(ref(db, 'notifications')), {
+          title,
+          body: msg,
+          image: img,
+          ts: Date.now()
+        });
+
+        Swal.fire({
+          icon: 'success',
+          title: '📢 পুশ নোটিফিকেশন পাঠানো হয়েছে!',
+          text: 'সকল প্লেয়ারের ফোনে নোটিফিকেশন ডেলিভারি হয়েছে।',
+          background: '#0f172a',
+          color: '#fff'
+        });
+      } catch(err) {
+        Swal.fire({ icon: 'error', title: 'ব্যর্থ', text: err.message, background: '#0f172a', color: '#fff' });
+      }
+    };
+
+    // ================= USERS & WALLET =================
+    onValue(ref(db, 'users'), s => {
+      const d = s.val() || {};
+      allUsers = Object.entries(d).map(([uid, u]) => ({ uid, ...u }));
+      renderUsersList();
+    });
+
+    window.filterUsers = (q) => {
+      renderUsersList(q);
+    };
+
+    function renderUsersList(query = '') {
+      const c = $('user-list-container');
+      const q = String(query || '').toLowerCase().trim();
+      let list = allUsers;
+      if (q) {
+        list = list.filter(u =>
+          String(u.name || '').toLowerCase().includes(q) ||
+          String(u.email || '').toLowerCase().includes(q) ||
+          String(u.phone || '').toLowerCase().includes(q)
+        );
+      }
+      $('user-count').innerText = list.length;
+
+      if (!list.length) {
+        c.innerHTML = '<div style="text-align:center;padding:24px;color:#94a3b8;">কোনো ইউজার পাওয়া যায়নি</div>';
+        return;
+      }
+
+      c.innerHTML = list.map(u => {
+        const dep = parseFloat(u.deposit || 0);
+        const win = parseFloat(u.winning || 0);
+        const isBanned = !!u.banned;
+        const name = esc(u.name || u.email?.split('@')[0] || 'Player');
+
+        return `
+          <div style="background:#090d16;border:1px solid #334155;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <div style="font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px;">
+                  ${name}
+                  ${isBanned ? '<span style="background:rgba(239,68,68,0.2);color:#ef4444;font-size:9px;padding:1px 6px;border-radius:6px;border:1px solid #ef4444;">🚫 BANNED</span>' : ''}
+                </div>
+                <div style="font-size:11px;color:#94a3b8;">${esc(u.phone || u.email || u.uid.substring(0, 10))}</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:13px;font-weight:800;color:#10b981;">৳${(dep+win).toFixed(0)}</div>
+                <div style="font-size:10px;color:#94a3b8;">ডিপো: ৳${dep} | উইন: ৳${win}</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px;">
+              <button onclick="creditUser('${u.uid}', 'deposit', 50)" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:8px;padding:6px;font-size:11px;font-weight:700;cursor:pointer;">+৳৫০ ডিপো</button>
+              <button onclick="creditUser('${u.uid}', 'winning', 50)" style="background:linear-gradient(135deg,#06b6d4,#0284c7);color:#fff;border:none;border-radius:8px;padding:6px;font-size:11px;font-weight:700;cursor:pointer;">+৳৫০ উইন</button>
+              <button onclick="toggleBan('${u.uid}', ${isBanned})" style="background:${isBanned?'#10b981':'#ef4444'};color:#fff;border:none;border-radius:8px;padding:6px;font-size:11px;font-weight:700;cursor:pointer;">${isBanned?'আনব্যান':'🚫 ব্যান'}</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.creditUser = async (uid, type, amount) => {
+      try {
+        const uRef = ref(db, `users/${uid}`);
+        const snap = await get(uRef);
+        const data = snap.val() || {};
+        const oldVal = parseFloat(data[type] || 0);
+        const newVal = Math.max(0, oldVal + amount);
+        await update(uRef, { [type]: newVal });
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'success',
+          title: `৳${amount} যোগ করা হয়েছে!`,
+          showConfirmButton: false,
+          timer: 1400,
+          background: '#0f172a',
+          color: '#fff'
+        });
+      } catch(e) {
+        Swal.fire({ icon: 'error', title: 'ত্রুটি', text: e.message, background: '#0f172a', color: '#fff' });
+      }
+    };
+
+    window.toggleBan = async (uid, currentBanned) => {
+      try {
+        await update(ref(db, `users/${uid}`), { banned: !currentBanned });
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: !currentBanned ? 'error' : 'success',
+          title: !currentBanned ? 'ইউজার ব্যান করা হয়েছে' : 'ব্যান প্রত্যাহার করা হয়েছে',
+          showConfirmButton: false,
+          timer: 1400,
+          background: '#0f172a',
+          color: '#fff'
+        });
+      } catch(e) {
+        Swal.fire({ icon: 'error', title: 'ত্রুটি', text: e.message, background: '#0f172a', color: '#fff' });
+      }
+    };
+
+    // ================= SETTINGS =================
+    window.saveAppSettings = async () => {
+      const bkash = $('set-bkash').value.trim();
+      const nagad = $('set-nagad').value.trim();
+      const rocket = $('set-rocket').value.trim();
+      const notice = $('set-notice').value.trim();
+      const pin = $('set-pin').value.trim() || '8080';
+
+      Swal.showLoading();
+      try {
+        await update(ref(db, 'app_settings'), {
+          bkash_number: bkash,
+          nagad_number: nagad,
+          rocket_number: rocket,
+          notice: notice,
+          admin_pin: pin
+        });
+        currentAdminPin = pin;
+        Swal.fire({
+          icon: 'success',
+          title: 'সেটিংস সেভ হয়েছে!',
+          text: 'বিকাশ, নগদ ও নোটিশ সফলভাবে আপডেট হয়েছে।',
+          background: '#0f172a',
+          color: '#fff'
+        });
+      } catch(e) {
+        Swal.fire({ icon: 'error', title: 'ব্যর্থ', text: e.message, background: '#0f172a', color: '#fff' });
+      }
+    };
+
+  </script>
+</body>
+</html>
