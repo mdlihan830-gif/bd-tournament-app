@@ -16,7 +16,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
 
     - name: Setup Java 17
       uses: actions/setup-java@v4
@@ -24,16 +24,17 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Install Dependencies & Prepare Assets
+    - name: Install Dependencies & Setup Capacitor Android
       run: |
         npm install --legacy-peer-deps
+        npm install --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/android
         mkdir -p www
         cp index.html www/ 2>/dev/null || true
         cp -r assets www/ 2>/dev/null || true
         if [ ! -d "android" ]; then
-          npx @capacitor/cli add android
+          npx cap add android
         fi
-        npx @capacitor/cli sync android
+        npx cap sync android
 
     - name: Inject Google Services
       run: |
